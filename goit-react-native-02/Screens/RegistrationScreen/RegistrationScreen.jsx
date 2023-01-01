@@ -35,13 +35,15 @@ export default function RegistrationScreen() {
   const [state, setState] = useState(initialState);
   const [iasReady, setIasReady] = useState(false);
   const [isHiddenPassword, setIsHiddenPassword] = useState(true);
-  const [dimensions, setDimensions] = useState(Dimensions.get("window").width);
+  const [dimensions, setDimensions] = useState(
+    Dimensions.get("window").width - 20 * 2
+  );
 
   console.log(Platform.OS);
 
   useEffect(() => {
     const onChange = () => {
-      const width = Dimensions.get("window").width;
+      const width = Dimensions.get("window").width - 20 * 2;
       console.log("width", width);
       setDimensions(width);
     };
@@ -75,20 +77,20 @@ export default function RegistrationScreen() {
           style={styles.image}
           source={require("../../assets/images/photo-bg.jpg")}
         >
-          <KeyboardAvoidingView
-            behavior={Platform.OS == "ios" ? "padding" : "height"}
-          >
-            <View
-              style={{
-                ...styles.form,
-                marginBottom: isShowKeyboard ? 20 : 0,
-              }}
+          <View style={styles.form}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS == "ios" ? "padding" : "height"}
             >
-              {/* <View style={styles.avatar}></View> */}
-              <Image
-                source={require("../../assets/images/rectangle-1.png")}
-                style={styles.addImg}
-              />
+              {!isShowKeyboard ? (
+                <View style={styles.avatar}></View>
+              ) : (
+                <Image
+                  source={require("../../assets/images/rectangle-1.png")}
+                  style={{
+                    ...styles.addImg,
+                  }}
+                />
+              )}
               <View style={styles.header}>
                 <Text style={styles.headerTitle}>Регистрация</Text>
               </View>
@@ -142,8 +144,8 @@ export default function RegistrationScreen() {
               <TouchableOpacity activeOpacity={0.8}>
                 <Text style={styles.loginText}>Вже маєте аккаунт? Увійти</Text>
               </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
+            </KeyboardAvoidingView>
+          </View>
         </ImageBackground>
       </View>
     </TouchableWithoutFeedback>
@@ -153,33 +155,63 @@ export default function RegistrationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+
     backgroundColor: "#fff",
   },
   image: {
+    // position: "relative",
+
     flex: 1,
-    resizeMode: "cover",
     justifyContent: "flex-end",
+
+    resizeMode: "contain",
     // justifyContent: "center",
     // alignItems: "center",
   },
   form: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    justifyContent: "center",
     paddingTop: 92,
     paddingBottom: 78,
     paddingLeft: 16,
     paddingRight: 16,
+    justifyContent: "center",
+
     fontFamily: "DMMono-Regular",
+
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+  },
+  avatar: {
+    position: "absolute",
+    top: -155,
+    left: 120,
+    backgroundColor: "#F6F6F6",
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+  },
+  addImg: {
+    position: "absolute",
+    top: -150,
+    left: 120,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 33,
+  },
+  headerTitle: {
+    fontFamily: "DMMono-Regular",
+    fontSize: 30,
+
+    color: "#212121;",
   },
   input: {
     paddingLeft: 16,
+    height: 50,
 
     backgroundColor: "#F6F6F6",
     borderWidth: 1,
     borderColor: "#E8E8E8",
-    height: 50,
     borderRadius: 8,
     color: "#BDBDBD",
   },
@@ -206,30 +238,8 @@ const styles = StyleSheet.create({
   loginText: {
     fontFamily: "DMMono-Regular",
     textAlign: "center",
-    color: "#1B4371",
     fontSize: 16,
-  },
-  // avatar: {
-  //   position: "absolute",
-  //   top: -55,
-  //   right: 140,
-  //   backgroundColor: "#F6F6F6",
-  //   width: 120,
-  //   height: 120,
-  //   borderRadius: 16,
-  // },
-  addImg: {
-    position: "absolute",
-    top: 25,
-    right: 129,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 33,
-  },
-  headerTitle: {
-    fontSize: 30,
-    color: "#212121;",
-    fontFamily: "DMMono-Regular",
+
+    color: "#1B4371",
   },
 });
