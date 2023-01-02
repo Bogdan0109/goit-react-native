@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,8 +14,10 @@ import {
   Dimensions,
 } from "react-native";
 
+import * as SplashScreen from "expo-splash-screen";
 import * as Font from "expo-font";
-import AppLoading from "expo-app-loading";
+
+SplashScreen.preventAutoHideAsync();
 
 const initialState = {
   login: "",
@@ -28,12 +30,12 @@ const loadApplication = async () => {
     "DMMono-Regular": require("../../assets/fonts/DMMono-Regular.ttf"),
   });
 };
-const center = 2;
+
 export default function LoginScreen() {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [inFocus, setInFocus] = useState(false);
   const [state, setState] = useState(initialState);
-  const [iasReady, setIasReady] = useState(false);
+  const [appIsReady, setAppIsReady] = useState(false);
   const [isHiddenPassword, setIsHiddenPassword] = useState(true);
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 20 * 2
@@ -60,18 +62,35 @@ export default function LoginScreen() {
     setState(initialState);
   };
 
-  if (!iasReady) {
-    return (
-      <AppLoading
-        startAsync={loadApplication}
-        onFinish={() => setIasReady(true)}
-        onError={console.warn}
-      />
-    );
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await loadApplication();
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
   }
 
   return (
-    <TouchableWithoutFeedback onPress={keyboardHide}>
+    <TouchableWithoutFeedback
+      onPress={keyboardHide}
+      onLayout={onLayoutRootView}
+    >
       <View style={styles.container}>
         <ImageBackground
           style={styles.image}
