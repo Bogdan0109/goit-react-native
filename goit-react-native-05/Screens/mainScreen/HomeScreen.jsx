@@ -17,9 +17,6 @@ export const HomeScreen = ({ navigation, route }) => {
   const isAvatarAdd = false;
 
   const { email, login, password } = route.params;
-  console.log("HomeScreen email:>> ", email);
-  console.log("HomeScreen login:>> ", login);
-  console.log("HomeScreen password:>> ", password);
 
   useEffect(() => {
     if (route.params) {
