@@ -18,7 +18,7 @@ import { authSignOutUser } from "../../redux/auth/authOperations";
 
 const NestedScreen = createStackNavigator();
 
-export function PostsScreen() {
+export default function PostsScreen() {
   const dispatch = useDispatch();
   const signOut = () => {
     dispatch(authSignOutUser());

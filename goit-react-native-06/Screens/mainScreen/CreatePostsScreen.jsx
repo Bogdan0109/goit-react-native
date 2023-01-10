@@ -9,11 +9,17 @@ import {
   TouchableWithoutFeedback,
   Image,
 } from "react-native";
+import { storage, db } from "../../firebase/config";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { collection, addDoc } from "firebase/firestore";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
-import { Camera, CameraType } from "expo-camera";
+import { Camera } from "expo-camera";
 import * as Location from "expo-location";
+import { useSelector } from "react-redux";
+const { v4: uuidv4 } = require("uuid");
+import { selectUserId, selectLogin } from "../../redux/selectors";
 
-export const CreatePostsScreen = ({ navigation }) => {
+export default function CreatePostsScreen({ navigation }) {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [snap, setSnap] = useState(null);
   const [photo, setPhoto] = useState(null);
@@ -22,6 +28,10 @@ export const CreatePostsScreen = ({ navigation }) => {
   const [photoTitle, setPhotoTitle] = useState("");
   const [place, setPlace] = useState("");
   const [checking, setChecking] = useState(false);
+
+  const userId = useSelector(selectUserId);
+
+  const login = useSelector(selectLogin);
 
   useEffect(() => {
     (async () => {
@@ -55,17 +65,6 @@ export const CreatePostsScreen = ({ navigation }) => {
     }
   };
 
-  const sendPhoto = () => {
-    navigation.navigate("HomeScreen", {
-      photo,
-      location,
-      photoTitle,
-      place,
-    });
-    resetData();
-
-  };
-
   const resetData = () => {
     setPhoto(null);
     setLocation(null);
@@ -91,6 +90,46 @@ export const CreatePostsScreen = ({ navigation }) => {
     setPlace(value);
     checkingInputs();
     return;
+  };
+
+  const uploadPhotoToServer = async () => {
+    const response = await fetch(photo);
+
+    const file = await response.blob();
+
+    const photoId = uuidv4();
+    const storageRef = ref(storage, `postImage/${photoId}`);
+    await uploadBytes(storageRef, file);
+
+    const photoUrl = await getDownloadURL(ref(storage, `postImage/${photoId}`));
+    return photoUrl;
+  };
+
+  const uploadPostToServer = async () => {
+    const photo = await uploadPhotoToServer();
+
+    try {
+      const docRef = await addDoc(collection(db, "posts"), {
+        userId,
+        login,
+        location,
+        photo,
+        photoTitle,
+      });
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  };
+
+  const sendPhoto = () => {
+    uploadPostToServer();
+    navigation.navigate("HomeScreen", {
+      photo,
+      location,
+      photoTitle,
+      place,
+    });
+    resetData();
   };
 
   return (
@@ -173,7 +212,7 @@ export const CreatePostsScreen = ({ navigation }) => {
       </View>
     </TouchableWithoutFeedback>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -204,7 +243,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  
+
   cameraBtn: {
     width: 60,
     height: 60,

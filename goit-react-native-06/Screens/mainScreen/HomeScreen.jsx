@@ -13,13 +13,19 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectEmail, selectLogin } from "../../redux/selectors";
 
-export const HomeScreen = ({ navigation }) => {
+export const HomeScreen = ({ navigation, route }) => {
   const [posts, setPosts] = useState([]);
   const [likes, setLikes] = useState(null);
   const isAvatarAdd = false;
 
   const login = useSelector(selectLogin);
   const email = useSelector(selectEmail);
+
+  useEffect(() => {
+    if (route.params) {
+      setPosts((prevState) => [...prevState, route.params]);
+    }
+  }, [route]);
 
   const onLikes = () => {
     setLikes((prevState) => prevState + 1);
@@ -40,6 +46,7 @@ export const HomeScreen = ({ navigation }) => {
         </View>
       </View>
       <FlatList
+        data={posts}
         keyExtractor={(index) => index.toString()}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 32 }}>
@@ -57,7 +64,9 @@ export const HomeScreen = ({ navigation }) => {
                 <TouchableOpacity
                   style={{ ...styles.comments, marginRight: 24 }}
                   onPress={() => {
-                    navigation.navigate("Comments"), sendInfoToComments();
+                    navigation.navigate("Comments", {
+                      ...route,
+                    });
                   }}
                 >
                   <Feather
